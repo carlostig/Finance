@@ -10,3 +10,6 @@ Effettua ottimizzazione media-varianza ( Markowitz) estraendo tickers da wikiped
 
 #OptimizCVAR.py :
 Effettua ottimizzazione max rendimento - min CVaR (Expected Shortfall) https://sites.math.washington.edu/~rtr/papers/rtr179-CVaR1.pdf
+
+#OptMinMaD.py:
+Effettua ottimizzazione max rendimento - min Mean Absolute Deviation (MAD) https://www.jstor.org/stable/2632458
