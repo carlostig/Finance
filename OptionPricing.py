@@ -11,12 +11,12 @@ import yfinance as yf
 import numpy as np
 import matplotlib.pyplot as plt 
 from scipy.stats import norm
-#
+# Seleziona Ticker 
 ticker= "BMPS.MI"
 period_= "1y"
 
 df=yf.download(ticker,period=period_,auto_adjust= True)
-#
+# Prendiamo i prezzi di chiusura (aggiustati) 
 S=df["Close"]
 #Ultimo prezzo sarà il prezzo di partenza per l'evoluzione dei prezzi futuri 
 S_0=S.iloc[-1].values
