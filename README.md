@@ -3,7 +3,7 @@ Finance Project
 
 #OptionPricing :
 Script che calcola pricing di opzioni Call/Put con MC e BS.
-Calcola di entrambi anche le greche
+Calcola di entrambe anche le greche
 
 #Mean_VarianceOptimization.py :
 Effettua ottimizzazione media-varianza ( Markowitz) estraendo tickers da wikipedia o caricando file csv
