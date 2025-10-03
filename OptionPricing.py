@@ -30,7 +30,7 @@ sigma= log_r.std().values # Volatilità Giornaliera
 
 n_sim= 60000 # N.Simulazioni
 dt=1 # Passo Giornaliero  --> Se si vuole cambiare passo è necessario aggiustare coerentemente mu e sigma
-trading_days=32 #Orizzonte Temporale 
+trading_days=32 #Orizzonte Temporale / Time to Maturity
 
 T=np.arange(0,trading_days + 1,dt)
 time_mat=np.tile(T,[n_sim,1])
