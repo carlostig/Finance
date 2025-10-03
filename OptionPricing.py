@@ -11,12 +11,12 @@ import yfinance as yf
 import numpy as np
 import matplotlib.pyplot as plt 
 from scipy.stats import norm
-#%%
+#
 ticker= "BMPS.MI"
 period_= "1y"
 
 df=yf.download(ticker,period=period_,auto_adjust= True)
-#%%
+#
 S=df["Close"]
 #Ultimo prezzo sarà il prezzo di partenza per l'evoluzione dei prezzi futuri 
 S_0=S.iloc[-1].values
@@ -26,7 +26,7 @@ log_r= (np.log(S.iloc[1::]/S.shift(1))).dropna()
 mu= log_r.mean().values # Rendimenti Giornalieri 
 sigma= log_r.std().values # Volatilità Giornaliera 
 
-#%% GBM dSt= muStdt + sigmaStdwt --> Ito --> ST= S_0 * e ** ((mu- 1/2*sigma**2)*t_k + sigma*W_T)  -> W_T aprox sqrt(T)*std.norm
+# GBM dSt= muStdt + sigmaStdwt --> Ito --> ST= S_0 * e ** ((mu- 1/2*sigma**2)*t_k + sigma*W_T)  -> W_T aprox sqrt(T)*std.norm
 
 n_sim= 60000 # N.Simulazioni
 dt=1 # Passo Giornaliero  --> Se si vuole cambiare passo è necessario aggiustare coerentemente mu e sigma
@@ -34,7 +34,7 @@ trading_days=32 #Orizzonte Temporale
 
 T=np.arange(0,trading_days + 1,dt)
 time_mat=np.tile(T,[n_sim,1])
-#%%
+#
 dW= np.random.standard_normal([n_sim,len(T)-1])* np.sqrt(dt)
 W_tk= np.hstack([np.zeros([n_sim,1]),np.cumsum(dW,1)]) #Facciamo partire il moto browniano in T=0 da zero 
 
@@ -43,7 +43,7 @@ W_tk= np.hstack([np.zeros([n_sim,1]),np.cumsum(dW,1)]) #Facciamo partire il moto
 # plt.figure()
 # plt.plot(time_mat.T,W_tk.T)
 # plt.show()
-#%%
+#
 
 S_tk= S_0* np.exp((mu- 0.5*np.power(sigma,2))*time_mat + sigma*W_tk)
 #%% plot GBM
@@ -86,7 +86,7 @@ d1 = (np.log(S_0/K) + (r_f_giornaliero + 0.5 * sigma**2) * trading_days) / (sigm
 d2 = d1 - sigma * np.sqrt(trading_days)
 C_0_BS = n_shares * (S_0 * norm.cdf(d1) - K * np.exp(-r_f_giornaliero * trading_days) * norm.cdf(d2))
 
-#%% Calcolo Greche 
+#Calcolo Greche 
 
 Delta_C= norm.cdf(d1)
 Gamma_C= norm.pdf(d1) / (S_0 * sigma * np.sqrt(trading_days))
@@ -101,7 +101,7 @@ print(f"Per fare delta hedging è necessario vendere {round(Delta_C[0],3)*n_shar
 prob_ITM_C = 100 * Delta_C[0]
 print(f"La probabilità che la call scada ITM è {prob_ITM_C:.3f}%")
 print("---")
-#%% Put 
+#Put 
 
 P_0_MC= n_shares * np.exp(-r_f_giornaliero*trading_days)*np.mean(np.maximum(K-S_T_RN_final,0))
 P_0_BS= n_shares* (K * np.exp(-r_f_giornaliero * trading_days) * norm.cdf(-d2)- S_0 * norm.cdf(-d1))
