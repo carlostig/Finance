@@ -11,30 +11,44 @@ import yfinance as yf
 import numpy as np
 import matplotlib.pyplot as plt 
 from scipy.stats import norm
-# Seleziona Ticker 
+from datetime import datetime
+
+#%%
 ticker= "BMPS.MI"
 period_= "1y"
 
 df=yf.download(ticker,period=period_,auto_adjust= True)
-# Prendiamo i prezzi di chiusura (aggiustati) 
-S=df["Close"]
-#Ultimo prezzo sarà il prezzo di partenza per l'evoluzione dei prezzi futuri 
-S_0=S.iloc[-1].values
-
+#%%
+S=df["Close"] #Prendo prezzi di chiusura giornalieri (aggiustati)
 log_r= (np.log(S.iloc[1::]/S.shift(1))).dropna()
 #lin_r= S.pct_change().dropna() #alternativa ai log ret, per var.rendimenti bassi i due risultati coincidono
 mu= log_r.mean().values # Rendimenti Giornalieri 
 sigma= log_r.std().values # Volatilità Giornaliera 
 
-# GBM dSt= muStdt + sigmaStdwt --> Ito --> ST= S_0 * e ** ((mu- 1/2*sigma**2)*t_k + sigma*W_T)  -> W_T aprox sqrt(T)*std.norm
+#%%
+
+def calcola_ttm(maturity_date):
+    if isinstance(maturity_date, str):
+        maturity = pd.to_datetime(maturity_date)
+    else:
+        maturity = maturity_date
+    
+    today = pd.Timestamp.now().normalize()
+    
+    # Crea range di date trading days (esclude weekend)
+    trading_days = pd.bdate_range(start=today, end=maturity)
+    return len(trading_days) - 1
+
+    
+expiration_date='2025-11-28'
+
+trading_days= calcola_ttm(expiration_date)
+#%% GBM dSt= muStdt + sigmaStdwt --> Ito --> ST= S_0 * e ** ((mu- 1/2*sigma**2)*t_k + sigma*W_T)  -> W_T aprox sqrt(T)*std.norm
 
 n_sim= 60000 # N.Simulazioni
 dt=1 # Passo Giornaliero  --> Se si vuole cambiare passo è necessario aggiustare coerentemente mu e sigma
-trading_days=32 #Orizzonte Temporale / Time to Maturity
-
 T=np.arange(0,trading_days + 1,dt)
 time_mat=np.tile(T,[n_sim,1])
-#
 dW= np.random.standard_normal([n_sim,len(T)-1])* np.sqrt(dt)
 W_tk= np.hstack([np.zeros([n_sim,1]),np.cumsum(dW,1)]) #Facciamo partire il moto browniano in T=0 da zero 
 
@@ -43,8 +57,9 @@ W_tk= np.hstack([np.zeros([n_sim,1]),np.cumsum(dW,1)]) #Facciamo partire il moto
 # plt.figure()
 # plt.plot(time_mat.T,W_tk.T)
 # plt.show()
-#
-
+#%%
+#Ultimo prezzo sarà il prezzo di partenza per l'evoluzione dei prezzi futuri 
+S_0=S.iloc[-1].values
 S_tk= S_0* np.exp((mu- 0.5*np.power(sigma,2))*time_mat + sigma*W_tk)
 #%% plot GBM
 # plt.figure()
@@ -86,13 +101,14 @@ d1 = (np.log(S_0/K) + (r_f_giornaliero + 0.5 * sigma**2) * trading_days) / (sigm
 d2 = d1 - sigma * np.sqrt(trading_days)
 C_0_BS = n_shares * (S_0 * norm.cdf(d1) - K * np.exp(-r_f_giornaliero * trading_days) * norm.cdf(d2))
 
-#Calcolo Greche 
+#%% Calcolo Greche 
 
 Delta_C= norm.cdf(d1)
 Gamma_C= norm.pdf(d1) / (S_0 * sigma * np.sqrt(trading_days))
 Vega_C = S_0 * norm.pdf(d1) * np.sqrt(trading_days) 
 Theta_C= (-S_0 * norm.pdf(d1) * sigma / (2 * np.sqrt(trading_days))  - r_f_giornaliero * K * np.exp(-r_f_giornaliero * trading_days) * norm.cdf(d2))
 print("---")
+print(f" V_0 Call {ticker}: {C_0_BS[0]:.3f}")
 print(f" Delta Call {ticker}: {Delta_C[0]:.3f}")
 print(f" Gamma Call {ticker} : {Gamma_C[0]:.3f}")
 print(f" Vega Call {ticker}: {Vega_C[0]:.3f}")
@@ -101,7 +117,7 @@ print(f"Per fare delta hedging è necessario vendere {round(Delta_C[0],3)*n_shar
 prob_ITM_C = 100 * Delta_C[0]
 print(f"La probabilità che la call scada ITM è {prob_ITM_C:.3f}%")
 print("---")
-#Put 
+#%% Put 
 
 P_0_MC= n_shares * np.exp(-r_f_giornaliero*trading_days)*np.mean(np.maximum(K-S_T_RN_final,0))
 P_0_BS= n_shares* (K * np.exp(-r_f_giornaliero * trading_days) * norm.cdf(-d2)- S_0 * norm.cdf(-d1))
@@ -110,6 +126,7 @@ Gamma_P= norm.pdf(d1) / (S_0 * sigma * np.sqrt(trading_days))
 Vega_P = S_0 * norm.pdf(d1) * np.sqrt(trading_days) 
 Theta_P = (-S_0 * norm.pdf(d1) * sigma / (2 * np.sqrt(trading_days)) + r_f_giornaliero * K * np.exp(-r_f_giornaliero * trading_days) * norm.cdf(-d2))
 print("---")
+print(f" V_0 Put {ticker}: {P_0_BS[0]:.3f}")
 print(f" Delta Put {ticker}: {Delta_P[0]:.3f}")
 print(f" Gamma Call {ticker} : {Gamma_P[0]:.3f}")
 print(f" Vega Call {ticker}: {Vega_P[0]:.3f}")
