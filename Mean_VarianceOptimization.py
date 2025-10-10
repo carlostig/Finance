@@ -90,17 +90,18 @@ def MarkowitzOptimization(returns: pd.DataFrame, eta: float | None=None) -> dict
 sol= (MarkowitzOptimization(returns))
 
 
-# Nested for loop solution
+
 mu=returns.mean().values
 eta_min=sol["Exp_Ret"]
 #Portafoglio a massimo rendimento = titolo con rendimento maggiore
 eta_max=np.max(mu)
 
-NN=50
 
+# definiamo diversi livelli di rendimenti target
+NN=50
 eta=np.linspace(eta_min, eta_max,NN)
 
-# %% Ottimizzazione for loops
+# %% ottimizziamo varianza per i diversi livelli di eta 
 sol= [MarkowitzOptimization(returns,et) for et in eta]
 #%%
 
