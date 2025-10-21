@@ -2,7 +2,7 @@
 Finance Project
 
 #OptionPricing :
-Script che calcola pricing di opzioni Call/Put con MC e BS.
+Classe per fare pricing di opzioni europee Call/Put con MC e BS. Presente anche una funzione per simulare l'andamento di un sottostante mediante MBG.
 Calcola di entrambe anche le greche
 
 #Mean_VarianceOptimization.py :
