@@ -2,8 +2,8 @@
 Finance Project
 
 #OptionPricing :
-Classe per fare pricing di opzioni europee Call/Put con MC e BS. Presente anche una funzione per simulare l'andamento di un sottostante mediante MBG.
-Calcola di entrambe anche le greche
+Classe per fare pricing di opzioni europee Call/Put con MC e BS, calcola di entrambe anche le greche. 
+Presente anche una funzione per simulare l'andamento di un sottostante mediante MBG.
 
 #Mean_VarianceOptimization.py :
 Effettua ottimizzazione media-varianza ( Markowitz) estraendo tickers da wikipedia o caricando file csv
